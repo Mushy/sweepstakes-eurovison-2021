@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eurovision Song Contest 2021 Sweepstake Picker</title>
+
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200;0,300;0,400;0,600;0,700;0,800;0,900;1,200;1,300;1,400;1,600;1,700;1,800;1,900&display=swap">
+
+<style>
+::-webkit-scrollbar {
+	width: 5px;
+	height: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+	background-color: rgba(11, 6, 46, .8);
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+body {
+	font-family: 'Nunito', sans-serif;
+	overflow: hidden;
+	padding: 0;
+	margin: 0;
+	height: 100vh;
+}
+
+header {
+	background-color: #0b062e;
+	color: #FFF;
+	padding: 20px;
+	display: flex;
+	height: 16vh;
+}
+
+.eurovision-logo {
+	margin-left: 1%;
+}
+
+header ul {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	margin-left: auto;
+	display: flex;
+	place-items: center;
+	gap: 30px;
+}
+
+header li {
+	font-size: 20px;
+}
+
+header div {
+	font-size: 44px;
+	text-align: center;
+}
+
+.container {
+	display: flex;
+	height: 84vh;
+}
+
+.side-bar {
+	background-color: #0b062e;
+	color: #FFF;
+	width: 20%;
+	padding: 15px;
+}
+
+.log {
+	width: 30%;
+	padding: 0 0 0 15px;
+	position: relative;
+	border: 0;
+	border-radius: 20px;
+	background-color: #FFF;
+}
+.log::before {
+	content: '';
+	position: absolute;
+	top: -1px;
+	left: -1px;
+	border-right: 20px solid #0b062e;
+	width: 20px;
+	height: 20px;
+	z-index: -1;
+}
+
+.log-entries {
+	overflow-y: scroll;
+	height: 100%;
+	padding-bottom: 15px;
+}
+
+.assigns {
+	width: 50%;
+	padding: 15px;
+	overflow-y: scroll;
+}
+
+button {
+	background-color: #3c7dce;
+	padding: 10px 30px;
+	color: #FFF;
+	border: 0;
+	border-radius: 10px;
+	cursor: pointer;
+	transition: background-color .3s ease-in;
+	margin: 0 auto;
+	width: 49%;
+}
+button:hover {
+	background: #3467b0;
+}
+
+.js-assignInfo {
+	text-align: center;
+	margin-bottom: 50px;
+}
+
+.roll-all-entry,
+.flag-country {
+	display: flex;
+	place-items: center;
+}
+
+.roll-all-entry {
+	margin-top: 15px;
+	padding: 10px;
+	border: 1px solid #0003;
+	border-radius: 7px;
+	width: 98%;
+	opacity: 0;
+	transition: opacity .3s ease-in;
+}
+
+.flag-country {
+	margin-right: 5px;
+}
+
+.flag-country img {
+	margin-right: 10px;
+}
+
+.assigns {
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.profile {
+	width: 25%;
+}
+
+
+.artist-holder {
+	margin-top: 15px;
+	transition: opacity 1s ease-in;
+	opacity: 0;
+}
+
+.artist-img img {
+	max-width: 100%;
+	border-radius: 10px;
+}
+
+.artist-country {
+	border: 1px solid #0002;
+	width: fit-content;
+	padding: 5px 30px;
+	border-radius: 50px;
+	transform: translateY(-70%);
+	background: #FFF;
+	display: flex;
+	place-items: center;
+	font-weight: bold;
+	font-size: 16px;
+	margin-left: 30px;
+}
+
+.artist-country img {
+	width: 20px;
+	margin-right: 10px;
+}
+
+.artist-name {
+	transform: translateY(-120%) translateX(3%);
+	width: 97%;
+}
+
+.artist-song {
+	font-size: 22px;
+	transform: translateY(-200%) translateX(3%);
+	width: 97%;
+}
+
+.assigned h3 {
+	margin-top: -20px;
+	font-size: 50px;
+	text-align: center;
+	transition: opacity .3s ease-in;
+	opacity: 0;
+}
+
+.assigned-to {
+	text-align: center;
+	font-size: 50px;
+	transition: opacity 1s ease-in;
+	opacity: 0;
+	margin-top: -20px;
+}
+
+.toggle-content {
+	transition: opacity .3s ease-in, height .3s ease-in;
+	opacity: 0;
+}
+.is-visible {
+	opacity: 1;
+}
+
+.js-assignInfo {
+	transition: opacity .3s ease-in;
+	opacity: 0;
+}
+
+td img {
+	width: 20px;
+	height: 20px;
+}
+</style>
+</head>
+<body>
+<header>
+	<img src="images/eurovision-logo-white.svg" width="300" height="116" class="eurovision-logo">
+
+	<ul>
+		<li>Countries: <div id="countryCount">0</div></li>
+		<li>Players: <div id="playerCount">0</div></li>
+		<li>Countries/Player: <div id="countriesPerPlayer">0</div></li>
+		<li>CPU Countries: <div id="floatingCountries">0</div></li>
+	</ul>
+</header>
+
+<div class="container">
+	<div class="side-bar">
+		<button type="button" class="js-quickAssign">Quick Assign</button>
+		<button type="button" class="js-stepAssign">Step Assign</button>
+
+		<div class="js-assignInfo">
+			<p>Assigning Country <span id="stt-currentCountry">0</span>/<span id="stt-countriesTotal">0</span></p>
+		</div>
+
+		<h2>Player List</h2>
+		<p id="playerList"></p>
+
+		<!--<img src="images/eurovision-symbol.svg" width="312" height="283" class="eurovision-symbol">-->
+	</div>
+
+	<div class="log">
+		<div class="log-entries"></div>
+	</div>
+
+	<div class="assigns"></div>
+</div>
+
+<script>
+const runQuickAssign = document.querySelector('.js-quickAssign');
+runQuickAssign.addEventListener('click', () => {
+	rollAllCountries();
+});
+
+const runStepAssign = document.querySelector('.js-stepAssign');
+runStepAssign.addEventListener('click', () => {
+	stepAssign();
+});
+
+function clearSweepstake() {
+	countriesFull = 0;
+	stepPosition = 0;
+
+	for (i = 0; i < totalPlayers; i++) {
+		players[i].countryCount = 0;
+		players[i].assignedCountries = [];
+	}
+
+	cpu.countryCount = 0;
+	cpu.assignedCountries = [];
+
+	document.querySelector('.log-entries').innerHTML = '';
+	document.querySelector('.assigns').innerHTML = '';
+	document.querySelector('#stt-currentCountry').innerText = '0';
+}
+
+function rollAllCountries() {
+	clearSweepstake();
+	let i = 0;
+	let playerListContainer = document.querySelector('.assigns');
+	
+	if (i === 0) {
+		playerListContainer.style.display = 'none';
+		playerListContainer.style.opacity = 0;
+		playerListContainer.style.transition = 'opacity .3s ease-in';
+	}
+
+	for (i = 0; i < totalCountries; i++) {
+		document.querySelector('#stt-currentCountry').innerText = i + 1;
+
+		let thisDiv = document.createElement('div');
+			thisDiv.id = 'roll-all_'+i;
+			thisDiv.className = 'roll-all-entry';
+
+		let countrySafe = countries[i].country.replace(' ', '-').toLowerCase();
+
+		if (countriesFull == totalPlayers) {
+			cpu.incrementCountryCount();
+			cpu.assignCountry(countries[i]);
+
+			thisDiv.innerHTML = '<span class="flag-country"><img src="assets/'+countrySafe+'/'+countrySafe+'-flag.png">'+countries[i].country+'</span><div> assigned to '+cpu.name+'</div>';
+			document.querySelector('.log-entries').insertAdjacentElement('beforeend', thisDiv);
+		} else {
+			playerNumber = randomPlayer();
+
+			thisDiv.innerHTML = '<span class="flag-country"><img src="assets/'+countrySafe+'/'+countrySafe+'-flag.png">'+countries[i].country+'</span><div> assigned to '+players[playerNumber].name+'</div>';
+			document.querySelector('.log-entries').insertAdjacentElement('beforeend', thisDiv);
+
+			players[playerNumber].incrementCountryCount();
+			players[playerNumber].assignCountry(countries[i]);
+
+			if (players[playerNumber].countryCount == countriesPerPlayer) countriesFull++;
+		}
+	}
+
+	if (cpu.countryCount > 0) players.push(cpu);
+
+	if (i === totalCountries) {
+		setTimeout(function() {
+			for (j = 0; j < totalCountries; j++) {
+				//document.querySelector('#roll-all_'+j).classList.add('fade-in');
+				document.querySelector('#roll-all_'+j).style.opacity = 1;
+			}
+		}, 100);
+
+		setTimeout(function() {
+			playerListContainer.style.display = 'flex';
+			playerListContainer.style.opacity = 1;
+		}, 300);
+	}
+
+	updatePlayerBlocks();
+}
+
+function stepAssign() {
+	let timerStart = 1000;
+	let timerFlagGrow = 100;
+	let timerCountryNameIn = 3000;
+	let timerPlayerNameIn = 3000;
+	let timerPanelName = timerStart + timerFlagGrow + timerCountryNameIn + timerPlayerNameIn;
+	let timerNextCountry = 10000;
+
+	let domAssigned = document.createElement('div');
+			domAssigned.classList.add('assigned');
+
+	let domArtistHolder = document.createElement('div');
+		domArtistHolder.classList.add('artist-holder');
+	
+	let domArtistImgHolder = document.createElement('div');
+		domArtistImgHolder.classList.add('artist-img');
+	
+	let domArtistImg = document.createElement('img');
+		domArtistImg.classList.add('js-artistImg');
+	
+	let domArtistCountry = document.createElement('div');
+		domArtistCountry.classList.add('artist-country');
+
+	let domCountryFlag = document.createElement('img');
+		domCountryFlag.classList.add('js-countryImg');
+
+	let domCountryText = document.createElement('span');
+		domCountryText.classList.add('js-countryText');
+		
+	let domArtistName = document.createElement('h2');
+		domArtistName.classList.add('artist-name');
+
+	let domArtistSong = document.createElement('div');
+		domArtistSong.classList.add('artist-song');
+
+	let domSingingFor = document.createElement('h3');
+		domSingingFor.classList.add('js-singingFor');
+		domSingingFor.innerText = 'Singing For';
+
+	let domAssignedTo = document.createElement('div');
+		domAssignedTo.classList.add('assigned-to');
+
+	if (stepPosition == 0) {
+		loadPlayerHolders();
+
+		document.querySelector('.js-assignInfo').style.opacity = 1;
+		document.querySelector('#stt-countriesTotal').innerText = totalCountries;
+		
+		domAssigned.appendChild(domArtistHolder);
+			domArtistHolder.appendChild(domArtistImgHolder);
+				domArtistImgHolder.appendChild(domArtistImg);
+			domArtistHolder.appendChild(domArtistCountry);
+				domArtistCountry.appendChild(domCountryFlag);
+				domArtistCountry.appendChild(domCountryText);
+			domArtistHolder.appendChild(domArtistName);
+			domArtistHolder.appendChild(domArtistSong);
+		domAssigned.appendChild(domSingingFor);
+		domAssigned.appendChild(domAssignedTo);
+
+		document.querySelector('.log-entries').appendChild(domAssigned);
+	}
+
+	if (stepPosition < totalCountries) {
+		currCountryFlag = countries[stepPosition].country.replace(' ', '-').toLowerCase();
+		currCountryName = countries[stepPosition].country;
+
+		document.querySelector('#stt-currentCountry').innerText = stepPosition + 1;
+
+		document.querySelector('.js-artistImg').src = 'assets/'+currCountryFlag+'/'+currCountryFlag+'.jpg';
+		document.querySelector('.js-countryImg').src = `assets/${currCountryFlag}/${currCountryFlag}-flag.png`;
+		document.querySelector('.js-countryText').innerText = currCountryName;
+		document.querySelector('.artist-name').innerText = countries[stepPosition].artist;
+		document.querySelector('.artist-song').innerText = countries[stepPosition].song;
+
+		setTimeout(function() {
+
+			setTimeout(function() {
+				document.querySelector('.artist-holder').style.opacity = 1;
+
+				setTimeout(function() {
+					document.querySelector('.js-singingFor').style.opacity = 1;
+
+					setTimeout(function() {
+						document.querySelector('.assigned-to').style.opacity = 1;
+					}, timerPlayerNameIn);
+				}, timerCountryNameIn);
+			}, timerFlagGrow);
+		}, timerStart);
+
+		if (countriesFull === totalPlayers) {
+			cpu.incrementCountryCount();
+			cpu.assignCountry(countries[stepPosition]);
+
+			if (cpu.countryCount === 1) {
+				players.push(cpu);
+			}
+
+			document.querySelector('.assigned-to').innerText = cpu.name;
+
+			let tbl = document.querySelector('#player-table_'+(totalPlayers));
+			let rows = tbl.rows;
+			rows[cpu.countryCount - 1].cells[0].innerHTML = `<img src="assets/${currCountryFlag}/${currCountryFlag}-flag.png" width="20" height="20">`;
+			rows[cpu.countryCount - 1].cells[1].innerText = currCountryName;
+
+			setTimeout(function() {
+				rows[cpu.CountryCount - 1].classList.add('is-visible');
+			}, timerPanelName);
+		} else {
+			playerNumber = randomPlayer();
+
+			document.querySelector('.assigned-to').innerText = players[playerNumber].name;
+
+			let tbl = document.querySelector('#player-table_'+playerNumber);
+			let rows = tbl.rows;
+			rows[players[playerNumber].countryCount].cells[0].innerHTML = `<img src="assets/${currCountryFlag}/${currCountryFlag}-flag.png" width="20" height="20">`;
+			rows[players[playerNumber].countryCount].cells[1].innerText = currCountryName;
+
+			players[playerNumber].incrementCountryCount();
+			players[playerNumber].assignCountry(countries[stepPosition]);
+
+			if (stepPosition < totalCountries && players[playerNumber].countryCount == countriesPerPlayer) countriesFull++;
+
+			setTimeout(function() {
+				rows[players[playerNumber].countryCount -1].classList.add('is-visible');
+			}, timerPanelName);
+		}
+
+		stepPosition++;
+
+		setTimeout(function() {
+			document.querySelector('.artist-holder').style.opacity = 0;
+			document.querySelector('.js-singingFor').style.opacity = 0;
+			document.querySelector('.assigned-to').style.opacity = 0;
+		}, (timerNextCountry - timerStart));
+
+		setTimeout(function() {
+			stepAssign();
+		}, timerNextCountry);
+	}
+}
+
+function acountry(artist, song, country) {
+	this.artist = artist;
+	this.song = song;
+	this.country = country;
+}
+
+function addArtist(artist, song, country) {
+	countries.push(new acountry(artist, song, country));
+	shuffleArray(countries);
+	updateTotalStats();
+}
+
+function player(name) {
+	this.name = name;
+	this.countryCount = 0;
+	this.assignedCountries = [];
+
+	this.assignCountry = (country) => {
+		this.assignedCountries.push(country);
+	}
+
+	this.incrementCountryCount = (amount = 1) => {
+		this.countryCount += amount;
+	}
+}
+
+function addPlayer(name) {
+	var name = name == undefined ? document.getElementById('playerName').value : name;
+
+	if (name == '') {
+		unnamed++;
+		name = 'Unnamed ' + unnamed;
+	}
+
+	let playerDiv = document.createElement('div');
+		playerDiv.style.opacity = 0;
+		playerDiv.style.transition = 'opacity .5s ease-in';
+		playerDiv.innerText = name;
+
+	document.getElementById('playerList').insertAdjacentElement('beforeend', playerDiv);
+	setTimeout(function() {
+		playerDiv.style.opacity = 1;
+	}, 100);
+
+	players.push(new player(name));
+	players.sort();
+
+	updateTotalStats();
+}
+
+function randomPlayer() {
+	let player = Math.floor(Math.random() * totalPlayers);
+
+	return players[player].countryCount == countriesPerPlayer ? randomPlayer() : player;
+}
+
+function shuffleArray(array) {
+	for (let i = array.length - 1; i > 0; i--) {
+		const j = Math.floor(Math.random() * (i + 1));
+		[array[i], array[j]] = [array[j], array[i]];
+	}
+}
+
+function updatePlayerBlocks() {
+	let playersContainer = document.querySelector('.assigns');
+	let playerBlock;
+	let j = 0;
+	let i = 0;
+
+	for (i = 0; i < totalPlayers; i++) {
+		playerBlock  = '<div class="profile">';
+		playerBlock += '<h2>'+players[i].name+'</h2>';
+		playerBlock += '<table class="table profile-stats">';
+		playerBlock += '<tbody>';
+
+		let playerCountriesCount = players[i].countryCount;
+		for (j = 0; j < playerCountriesCount; j++) {
+			playerBlock += '<tr>';
+			playerBlock += '<td class="text-left"><span class="flag-icon"><img src="assets/'+players[i].assignedCountries[j].country.replace(' ', '-').toLowerCase()+'/'+players[i].assignedCountries[j].country.replace(' ', '-').toLowerCase()+'-flag.png"></span></td>';
+			playerBlock += '<td class="text-left">'+players[i].assignedCountries[j].country+'</td>';
+			playerBlock += '</tr>';
+		}
+
+		playerBlock += '</tbody>';
+		playerBlock += '</table>';
+		playerBlock += '</div>';
+
+		playersContainer.insertAdjacentHTML('beforeend', playerBlock);
+	}
+
+	if (cpu.countryCount > 0) {
+		playerBlock  = '<div class="profile">';
+		playerBlock += '<h2>'+cpu.name+'</h2>';
+		playerBlock += '<table class="table profile-stats">';
+		playerBlock += '<tbody>';
+
+		cpuCountriesCount = cpu.countryCount;
+		for (j = 0; j < cpuCountriesCount; j++) {
+			playerBlock += '<tr>';
+			playerBlock += '<td class="text-left"><span class="flag-icon"><img src="assets/'+cpu.assignedCountries[j].country.replace(' ', '-').toLowerCase()+'/'+cpu.assignedCountries[j].country.replace(' ', '-').toLowerCase()+'-flag.png"></span></td>';
+			playerBlock += '<td class="text-left">'+cpu.assignedCountries[j].country+'</td>';
+			playerBlock += '</tr>';
+		}
+
+		playerBlock += '</tbody>';
+		playerBlock += '</table>';
+		playerBlock += '</div>';
+
+		playersContainer.insertAdjacentHTML('beforeend', playerBlock);
+	}
+}
+
+function updateTotalStats() {
+	totalCountries = countries.length;
+	totalPlayers = players.length;
+	countriesPerPlayer = totalPlayers > 0 ? Math.floor(totalCountries / totalPlayers) : 0;
+	floatingCountries = totalPlayers > 0 ? totalCountries - (countriesPerPlayer * totalPlayers) : totalCountries;
+
+	document.querySelector('#countryCount').innerText = totalCountries;
+	document.querySelector('#playerCount').innerText = cpu.countryCount > 0 ? totalPlayers - 1 : totalPlayers;
+	document.querySelector('#countriesPerPlayer').innerText = countriesPerPlayer;
+	document.querySelector('#floatingCountries').innerText = floatingCountries;
+	document.querySelector('#stt-countriesTotal').innerText = totalCountries;
+}
+
+function createPlayerBlock(id, name, override) {
+	playerBlock  = '<div class="profile">';
+	playerBlock += '<h2>'+name+'</h2>';
+	playerBlock += '<table class="table profile-stats">';
+	playerBlock += '<tbody id="player-table_'+id+'">';
+
+	let i = 0;
+	let placeholders = override != undefined ? override : countriesPerPlayer;
+	for (i = 0; i < placeholders; i++) {
+		playerBlock += '<tr id="country_'+i+'" class="toggle-content"><td>&nbsp;</td><td>&nbsp;</td></tr>';
+	}
+
+	playerBlock += '</tbody>';
+	playerBlock += '</table>';
+	playerBlock += '</div>';
+
+	document.querySelector('.assigns').insertAdjacentHTML('beforeend', playerBlock);
+}
+
+function loadPlayerHolders() {
+	for (i = 0; i < totalPlayers; i++) {
+		createPlayerBlock(i, players[i].name);
+	}
+
+	if (floatingCountries > 0) {
+		createPlayerBlock(i, cpu.name, floatingCountries);
+	}
+}
+
+let countries = [];
+let players = [];
+let stepPosition = 0;
+let totalCountries = countries.length;
+let totalPlayers = players.length;
+let countriesPerPlayer = 0;
+let floatingCountries = 0;
+let countriesFull = 0;
+let unnamed = 0;
+
+let cpu = new player('CPU');
+addPlayer('Colin');
+addPlayer('Tom');
+addPlayer('Stephen');
+addPlayer('Andy');
+addPlayer('John');
+addPlayer('Cath');
+addPlayer('Martin');
+addPlayer('Connor');
+addPlayer('Mia');
+addPlayer('Samara');
+addPlayer('Gill');
+
+addArtist("Anxhela Peristeri", "Karma", "Albania");
+addArtist("Montaigne", "Technicolour", "Australia");
+addArtist("Vincent Bueno", "Amen", "Austria");
+addArtist("Efendi", "Mata Hari", "Azerbaijan");
+addArtist("Hooverphonic", "The Wrong Place", "Belgium");
+addArtist("VICTORIA", "Growing Up Is Getting Old", "Bulgaria");
+addArtist("Albina", "Tick-Tock", "Croatia");
+addArtist("Elena Tsagrinou", "El Diablo", "Cyprus");
+addArtist("Benny Cristo", "omaga", "Czech Republic");
+addArtist("Fyr Og Flamme", "Øve Os På Hinanden", "Denmark");
+addArtist("Uku Suviste", "The Lucky One", "Estonia");
+addArtist("Blind Channel", "Dark Side", "Finland");
+addArtist("Barbara Pravi", "Voilà", "France");
+addArtist("Tornike Kipiani", "You", "Georgia");
+addArtist("Jendrik", "I Don't Feel Hate", "Germany");
+addArtist("Stefania", "Last Dance", "Greece");
+addArtist("Daði og Gagnamagnið", "10 Years", "Iceland");
+addArtist("Lesley Roy", "Maps", "Ireland");
+addArtist("Eden Alene", "Set Me Free", "Israel");
+addArtist("Måneskin", "Zitti E Buoni", "Italy");
+addArtist("Samanta Tīna", "The Moon Is Rising", "Latvia");
+addArtist("The Roop", "Discoteque", "Lithuania");
+addArtist("Destiny", "Je Me Casse", "Malta");
+addArtist("Natalia Gordienko", "SUGAR", "Moldova");
+addArtist("Vasil", "Here I Stand", "North Macedonia");
+addArtist("TIX", "Fallen Angel", "Norway");
+addArtist("RAFAŁ", "The Ride", "Poland");
+addArtist("The Black Mamba", "Love Is On My Side", "Portugal");
+addArtist("ROXEN", "Amnesia", "Romania");
+addArtist("Manizha", "Russian Woman", "Russia");
+addArtist("Senhit", "Adrenalina", "San Marino");
+addArtist("Hurricane", "Loco Loco", "Serbia");
+addArtist("Ana Soklič", "Amen", "Slovenia");
+addArtist("Blas Cantó", "Voy A Quedarme", "Spain");
+addArtist("Tusse", "Voices", "Sweden");
+addArtist("Gjon's Tears", "Tout l'Univers", "Switzerland");
+addArtist("Jeangu Macrooy", "Birth Of A New Age", "The Netherlands");
+addArtist("Go_A", "Shum", "Ukraine");
+addArtist("James Newman", "Embers", "United Kingdom");
+</script>
+</body>
+</html>
