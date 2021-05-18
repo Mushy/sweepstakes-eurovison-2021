@@ -274,14 +274,17 @@ td img {
 <script>
 const runQuickAssign = document.querySelector('.js-quickAssign');
 runQuickAssign.addEventListener('click', () => {
+	clearSweepstake();
 	rollAllCountries();
 });
 
 const runStepAssign = document.querySelector('.js-stepAssign');
 runStepAssign.addEventListener('click', () => {
+	clearSweepstake();
 	stepAssign();
 });
 
+// Just in case someone wants to be able to quick assign / step through without refreshing.
 function clearSweepstake() {
 	countriesFull = 0;
 	stepPosition = 0;
@@ -300,7 +303,6 @@ function clearSweepstake() {
 }
 
 function rollAllCountries() {
-	clearSweepstake();
 	let i = 0;
 	let playerListContainer = document.querySelector('.assigns');
 	
@@ -343,7 +345,6 @@ function rollAllCountries() {
 	if (i === totalCountries) {
 		setTimeout(function() {
 			for (j = 0; j < totalCountries; j++) {
-				//document.querySelector('#roll-all_'+j).classList.add('fade-in');
 				document.querySelector('#roll-all_'+j).style.opacity = 1;
 			}
 		}, 100);
@@ -462,7 +463,7 @@ function stepAssign() {
 			rows[cpu.countryCount - 1].cells[1].innerText = currCountryName;
 
 			setTimeout(function() {
-				rows[cpu.CountryCount - 1].classList.add('is-visible');
+				rows[cpu.countryCount - 1].classList.add('is-visible');
 			}, timerPanelName);
 		} else {
 			playerNumber = randomPlayer();
@@ -498,6 +499,7 @@ function stepAssign() {
 	}
 }
 
+// Because apparenly I can't use country as a function name, it complains about constructors.
 function acountry(artist, song, country) {
 	this.artist = artist;
 	this.song = song;
@@ -570,14 +572,14 @@ function updatePlayerBlocks() {
 	for (i = 0; i < totalPlayers; i++) {
 		playerBlock  = '<div class="profile">';
 		playerBlock += '<h2>'+players[i].name+'</h2>';
-		playerBlock += '<table class="table profile-stats">';
+		playerBlock += '<table class="table profile-stats">'; // I really shouldn't be using tables but this was a C&P from some old code that also had score columns and such. Change later.
 		playerBlock += '<tbody>';
 
 		let playerCountriesCount = players[i].countryCount;
 		for (j = 0; j < playerCountriesCount; j++) {
 			playerBlock += '<tr>';
-			playerBlock += '<td class="text-left"><span class="flag-icon"><img src="assets/'+players[i].assignedCountries[j].country.replace(' ', '-').toLowerCase()+'/'+players[i].assignedCountries[j].country.replace(' ', '-').toLowerCase()+'-flag.png"></span></td>';
-			playerBlock += '<td class="text-left">'+players[i].assignedCountries[j].country+'</td>';
+			playerBlock += '<td><img src="assets/'+players[i].assignedCountries[j].country.replace(' ', '-').toLowerCase()+'/'+players[i].assignedCountries[j].country.replace(' ', '-').toLowerCase()+'-flag.png"></td>';
+			playerBlock += '<td>'+players[i].assignedCountries[j].country+'</td>';
 			playerBlock += '</tr>';
 		}
 
@@ -597,8 +599,8 @@ function updatePlayerBlocks() {
 		cpuCountriesCount = cpu.countryCount;
 		for (j = 0; j < cpuCountriesCount; j++) {
 			playerBlock += '<tr>';
-			playerBlock += '<td class="text-left"><span class="flag-icon"><img src="assets/'+cpu.assignedCountries[j].country.replace(' ', '-').toLowerCase()+'/'+cpu.assignedCountries[j].country.replace(' ', '-').toLowerCase()+'-flag.png"></span></td>';
-			playerBlock += '<td class="text-left">'+cpu.assignedCountries[j].country+'</td>';
+			playerBlock += '<td><img src="assets/'+cpu.assignedCountries[j].country.replace(' ', '-').toLowerCase()+'/'+cpu.assignedCountries[j].country.replace(' ', '-').toLowerCase()+'-flag.png"></td>';
+			playerBlock += '<td>'+cpu.assignedCountries[j].country+'</td>';
 			playerBlock += '</tr>';
 		}
 
@@ -663,6 +665,7 @@ let countriesFull = 0;
 let unnamed = 0;
 
 let cpu = new player('CPU');
+// Because I don't want to type these every time lets just add them here for now...
 addPlayer('Colin');
 addPlayer('Tom');
 addPlayer('Stephen');
@@ -674,7 +677,10 @@ addPlayer('Connor');
 addPlayer('Mia');
 addPlayer('Samara');
 addPlayer('Gill');
+addPlayer('Carl');
+addPlayer('Rob');
 
+// Load the teams. This could be shifted to JSON later on to allow for extra events with ease.
 addArtist("Anxhela Peristeri", "Karma", "Albania");
 addArtist("Montaigne", "Technicolour", "Australia");
 addArtist("Vincent Bueno", "Amen", "Austria");
