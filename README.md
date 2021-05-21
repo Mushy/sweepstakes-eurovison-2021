@@ -16,7 +16,7 @@ This feature will step through all artists on a timer fading in artist info and 
 This feature works much the same as Step Assign with the major difference being it is not automatic stepping, you need to click the button again to assign the next artist.
 
 ### Clear Sweeps
-Simply removes any assigning that has been done already and allows you to go from fresh.
+Simply removes any assigning that has been done already and allows you to go from fresh. Clearing the sweepstakes will also randomise the countries again.
 
 ## Todo
 If I ever get time / inclination to go back...
