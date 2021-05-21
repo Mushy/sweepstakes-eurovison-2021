@@ -24,9 +24,6 @@ If I ever get time / inclination to go back...
 ### Cleaner / better code.
 This was a quick hack job and I'm no JS dev. Ideally better code will be done at some point.
 
-### Split files.
-At the moment this is all in a single html file.
-
 ### Add Player
 Currently players are hard set in the code to save time developing / debugging. Ideally this would be altered to allow people to add players and start from fresh.
 
