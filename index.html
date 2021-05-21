@@ -7,7 +7,9 @@
 <title>Eurovision Song Contest 2021 Sweepstake Picker</title>
 
 <link rel="preconnect" href="https://fonts.gstatic.com">
+
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200;0,300;0,400;0,600;0,700;0,800;0,900;1,200;1,300;1,400;1,600;1,700;1,800;1,900&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" referrerpolicy="no-referrer">
 
 <style>
 ::-webkit-scrollbar {
@@ -163,8 +165,19 @@ button:hover {
 
 .artist-holder {
 	margin-top: 15px;
-	transition: opacity 1s ease-in;
+	transition: opacity .3s ease-in;
 	opacity: 0;
+	overflow: hidden;
+}
+
+.slide-container {
+	position: relative;
+	display: flex;
+}
+
+.artist-img {
+	transition: transform .3s ease-in;
+	flex: 0 0 100%;
 }
 
 .artist-img img {
@@ -234,6 +247,64 @@ button:hover {
 td img {
 	width: 20px;
 	height: 20px;
+}
+
+.videoWrapper {
+	position: relative;
+	padding-bottom: 52.25%; /* 16:9 */
+	height: 0;
+	transition: transform .3s ease-in;
+	/* width: 748px;
+	height: 398px; */
+	flex: 0 0 100%;
+}
+.videoWrapper iframe {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	border: 0;
+	border-radius: 10px;
+}
+
+.slideOutImg {
+	transform: translateX(-100%);
+}
+
+.slideInVid {
+	transform: translateX(-100%);
+}
+
+.ctrl-container {
+	position: absolute;
+	bottom: 10px;
+	right: 5px;
+	width: 8%;
+	height: 45px;
+	font-size: 40px;
+	color: #FFF7;
+}
+
+.ctrl-image-slide,
+.ctrl-video-slide {
+	position: absolute;
+	top: 0;
+	cursor: pointer;
+}
+
+.ctrl-image-slide {
+	left: 0;
+}
+.ctrl-image-slide:hover {
+	color: #FFFF
+}
+
+.ctrl-video-slide {
+	right: 0;
+}
+.ctrl-video-slide:hover {
+	color: #FFFF;
 }
 </style>
 </head>
@@ -396,7 +467,7 @@ function buildArtist() {
 		domArtistHolder.classList.add('artist-holder');
 	
 	let domArtistImgHolder = document.createElement('div');
-		domArtistImgHolder.classList.add('artist-img');
+		domArtistImgHolder.classList.add('artist-img', 'slide-image');
 	
 	let domArtistImg = document.createElement('img');
 		domArtistImg.classList.add('js-artistImg');
@@ -423,9 +494,43 @@ function buildArtist() {
 	let domAssignedTo = document.createElement('div');
 		domAssignedTo.classList.add('assigned-to');
 
+	let domIframeHolder = document.createElement('div');
+		domIframeHolder.classList.add('videoWrapper', 'slide-video');
+
+	let domIframe = document.createElement('iframe');
+		domIframe.width = '368px';
+		domIframe.height = '207px';
+		domIframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+		domIframe.allowfullscreen = true;
+		domIframe.title = 'YouTube video player';
+		domIframe.src = 'https://www.youtube.com/embed/CoUTzNXQud0'; // If I don't set a default src it won't show on the first slide :(
+		domIframe.classList.add('js-video-frame');
+
+	let domSlideContainer = document.createElement('div');
+		domSlideContainer.classList.add('slide-container');
+
+	let ctrlContainer = document.createElement('div');
+		ctrlContainer.classList.add('ctrl-container');
+
+	let ctrlImageSlide = document.createElement('div');
+		ctrlImageSlide.classList.add('ctrl-image-slide');
+		ctrlImageSlide.innerHTML = '<i class="fas fa-chevron-left"></i>';
+
+	let ctrlVideoSlide = document.createElement('div');
+		ctrlVideoSlide.classList.add('ctrl-video-slide');
+		ctrlVideoSlide.innerHTML = '<i class="fas fa-chevron-right"></i>';
+
 	domAssigned.appendChild(domArtistHolder);
-		domArtistHolder.appendChild(domArtistImgHolder);
-			domArtistImgHolder.appendChild(domArtistImg);
+		domArtistHolder.appendChild(domSlideContainer);
+			domSlideContainer.appendChild(domArtistImgHolder);
+//		domArtistHolder.appendChild(domArtistImgHolder);
+				domArtistImgHolder.appendChild(domArtistImg);
+			domSlideContainer.appendChild(domIframeHolder);
+//		domArtistHolder.appendChild(domIframeHolder);
+				domIframeHolder.appendChild(domIframe);
+			domSlideContainer.appendChild(ctrlContainer);
+				ctrlContainer.appendChild(ctrlImageSlide);
+				ctrlContainer.appendChild(ctrlVideoSlide);
 		domArtistHolder.appendChild(domArtistCountry);
 			domArtistCountry.appendChild(domCountryFlag);
 			domArtistCountry.appendChild(domCountryText);
@@ -435,6 +540,25 @@ function buildArtist() {
 	domAssigned.appendChild(domAssignedTo);
 
 	document.querySelector('.log-entries').appendChild(domAssigned);
+
+	let imgSlide = document.querySelector('.slide-image');
+	let vidSlide = document.querySelector('.slide-video');
+
+	let imgSlideCtrl = document.querySelector('.ctrl-image-slide');
+		imgSlideCtrl.addEventListener('click', () => {
+			vidSlide.classList.remove('slideInVid');
+			imgSlide.classList.remove('slideOutImg');
+			//imgSlide.classList.add('slideOutImg');
+			//vidSlide.classList.add('slideInVid');
+		});
+
+	let vidSlideCtrl = document.querySelector('.ctrl-video-slide');
+		vidSlideCtrl.addEventListener('click', () => {
+			imgSlide.classList.add('slideOutImg');
+			vidSlide.classList.add('slideInVid');
+			//vidSlide.classList.remove('slideInVid');
+			//imgSlide.classList.remove('slideOutImg');
+		});
 }
 
 
@@ -461,6 +585,7 @@ function setNextCountry(timerPlayerNameIn, timerCountryNameIn, timerFlagGrow, ti
 	document.querySelector('.js-countryText').innerText = currCountryName;
 	document.querySelector('.artist-name').innerText = countries[stepPosition].artist;
 	document.querySelector('.artist-song').innerText = countries[stepPosition].song;
+	document.querySelector('.js-video-frame').src = countries[stepPosition].video;
 
 	setTimeout(function() {
 		setTimeout(function() {
@@ -581,16 +706,17 @@ function stepAssign() {
 
 
 // Because apparenly I can't use country as a function name, it complains about constructors.
-function acountry(artist, song, country) {
+function acountry(artist, song, country, video) {
 	this.artist = artist;
 	this.song = song;
 	this.country = country;
+	this.video = video;
 }
 
 
 
-function addArtist(artist, song, country) {
-	countries.push(new acountry(artist, song, country));
+function addArtist(artist, song, country, video) {
+	countries.push(new acountry(artist, song, country, video));
 	shuffleArray(countries);
 	updateTotalStats();
 }
@@ -782,45 +908,45 @@ addPlayer('Carl');
 addPlayer('Rob');
 
 // Load the teams. This could be shifted to JSON later on to allow for extra events with ease or to extend the properties for an artist - YouTube video, audio clip, etc.
-addArtist("Anxhela Peristeri", "Karma", "Albania");
-addArtist("Montaigne", "Technicolour", "Australia");
-addArtist("Vincent Bueno", "Amen", "Austria");
-addArtist("Efendi", "Mata Hari", "Azerbaijan");
-addArtist("Hooverphonic", "The Wrong Place", "Belgium");
-addArtist("VICTORIA", "Growing Up Is Getting Old", "Bulgaria");
-addArtist("Albina", "Tick-Tock", "Croatia");
-addArtist("Elena Tsagrinou", "El Diablo", "Cyprus");
-addArtist("Benny Cristo", "omaga", "Czech Republic");
-addArtist("Fyr Og Flamme", "Øve Os På Hinanden", "Denmark");
-addArtist("Uku Suviste", "The Lucky One", "Estonia");
-addArtist("Blind Channel", "Dark Side", "Finland");
-addArtist("Barbara Pravi", "Voilà", "France");
-addArtist("Tornike Kipiani", "You", "Georgia");
-addArtist("Jendrik", "I Don't Feel Hate", "Germany");
-addArtist("Stefania", "Last Dance", "Greece");
-addArtist("Daði og Gagnamagnið", "10 Years", "Iceland");
-addArtist("Lesley Roy", "Maps", "Ireland");
-addArtist("Eden Alene", "Set Me Free", "Israel");
-addArtist("Måneskin", "Zitti E Buoni", "Italy");
-addArtist("Samanta Tīna", "The Moon Is Rising", "Latvia");
-addArtist("The Roop", "Discoteque", "Lithuania");
-addArtist("Destiny", "Je Me Casse", "Malta");
-addArtist("Natalia Gordienko", "SUGAR", "Moldova");
-addArtist("Vasil", "Here I Stand", "North Macedonia");
-addArtist("TIX", "Fallen Angel", "Norway");
-addArtist("RAFAŁ", "The Ride", "Poland");
-addArtist("The Black Mamba", "Love Is On My Side", "Portugal");
-addArtist("ROXEN", "Amnesia", "Romania");
-addArtist("Manizha", "Russian Woman", "Russia");
-addArtist("Senhit", "Adrenalina", "San Marino");
-addArtist("Hurricane", "Loco Loco", "Serbia");
-addArtist("Ana Soklič", "Amen", "Slovenia");
-addArtist("Blas Cantó", "Voy A Quedarme", "Spain");
-addArtist("Tusse", "Voices", "Sweden");
-addArtist("Gjon's Tears", "Tout l'Univers", "Switzerland");
-addArtist("Jeangu Macrooy", "Birth Of A New Age", "The Netherlands");
-addArtist("Go_A", "Shum", "Ukraine");
-addArtist("James Newman", "Embers", "United Kingdom");
+addArtist("Anxhela Peristeri", "Karma", "Albania", "https://www.youtube.com/embed/_9KXznajJvY");
+addArtist("Montaigne", "Technicolour", "Australia", "https://www.youtube.com/embed/CoUTzNXQud0");
+addArtist("Vincent Bueno", "Amen", "Austria", "https://www.youtube.com/embed/xV9_pKj8Df8");
+addArtist("Efendi", "Mata Hari", "Azerbaijan", "https://www.youtube.com/embed/5ZVC6f9cXKk");
+addArtist("Hooverphonic", "The Wrong Place", "Belgium", "https://www.youtube.com/embed/DaBiom7_rvU");
+addArtist("VICTORIA", "Growing Up Is Getting Old", "Bulgaria", "https://www.youtube.com/embed/xORSj7dSfis");
+addArtist("Albina", "Tick-Tock", "Croatia", "https://www.youtube.com/embed/vKdxjoNluzY");
+addArtist("Elena Tsagrinou", "El Diablo", "Cyprus", "https://www.youtube.com/embed/ZHeydRCBPNs");
+addArtist("Benny Cristo", "omaga", "Czech Republic", "https://www.youtube.com/embed/cgGRCTUPsqY");
+addArtist("Fyr Og Flamme", "Øve Os På Hinanden", "Denmark", "https://www.youtube.com/embed/w2ytONrRyww");
+addArtist("Uku Suviste", "The Lucky One", "Estonia", "https://www.youtube.com/embed/mhMZQyv_Fhw");
+addArtist("Blind Channel", "Dark Side", "Finland", "https://www.youtube.com/embed/Aw6KnFIIa4I");
+addArtist("Barbara Pravi", "Voilà", "France", "https://www.youtube.com/embed/WQe8B-uXUWY");
+addArtist("Tornike Kipiani", "You", "Georgia", "https://www.youtube.com/embed/5qnogt74_F8");
+addArtist("Jendrik", "I Don't Feel Hate", "Germany", "https://www.youtube.com/embed/BRxuYhrOsgM");
+addArtist("Stefania", "Last Dance", "Greece", "https://www.youtube.com/embed/BUWt6VbolqE");
+addArtist("Daði og Gagnamagnið", "10 Years", "Iceland", "https://www.youtube.com/embed/jaTRNImqnHM");
+addArtist("Lesley Roy", "Maps", "Ireland", "https://www.youtube.com/embed/FY2rxbZNvZ0");
+addArtist("Eden Alene", "Set Me Free", "Israel", "https://www.youtube.com/embed/26Gn0Xqk9k4");
+addArtist("Måneskin", "Zitti E Buoni", "Italy", "https://www.youtube.com/embed/GL1mzJuV11c");
+addArtist("Samanta Tīna", "The Moon Is Rising", "Latvia", "https://www.youtube.com/embed/btA_Tyiyfhc");
+addArtist("The Roop", "Discoteque", "Lithuania", "https://www.youtube.com/embed/ZGsjtJn4aAo");
+addArtist("Destiny", "Je Me Casse", "Malta", "https://www.youtube.com/embed/uUElgja4B9w");
+addArtist("Natalia Gordienko", "SUGAR", "Moldova", "https://www.youtube.com/embed/3FRnNkGLGN4");
+addArtist("Vasil", "Here I Stand", "North Macedonia", "https://www.youtube.com/embed/WRcSHPb_Qwc");
+addArtist("TIX", "Fallen Angel", "Norway", "https://www.youtube.com/embed/7aWow1MKHzc");
+addArtist("RAFAŁ", "The Ride", "Poland", "https://www.youtube.com/embed/Uy6TeDNvSGo");
+addArtist("The Black Mamba", "Love Is On My Side", "Portugal", "https://www.youtube.com/embed/koJAGIUlnD0");
+addArtist("ROXEN", "Amnesia", "Romania", "https://www.youtube.com/embed/5ZWcsj_6Log");
+addArtist("Manizha", "Russian Woman", "Russia", "https://www.youtube.com/embed/ajfaz1CKZq0");
+addArtist("Senhit", "Adrenalina", "San Marino", "https://www.youtube.com/embed/YtVBxZXGJNg");
+addArtist("Hurricane", "Loco Loco", "Serbia", "https://www.youtube.com/embed/khnpL7HqN5I");
+addArtist("Ana Soklič", "Amen", "Slovenia", "https://www.youtube.com/embed/J9jWDxKQ50s");
+addArtist("Blas Cantó", "Voy A Quedarme", "Spain", "https://www.youtube.com/embed/Eo8St0_Slac");
+addArtist("Tusse", "Voices", "Sweden", "https://www.youtube.com/embed/m0BfFw3sE_E");
+addArtist("Gjon's Tears", "Tout l'Univers", "Switzerland", "https://www.youtube.com/embed/M_5mo8st8Mc");
+addArtist("Jeangu Macrooy", "Birth Of A New Age", "The Netherlands", "https://www.youtube.com/embed/y6ZJbSAudxk");
+addArtist("Go_A", "Shum", "Ukraine", "https://www.youtube.com/embed/fV4EKm5lkVk");
+addArtist("James Newman", "Embers", "United Kingdom", "https://www.youtube.com/embed/Isth9_oNNa8");
 </script>
 </body>
 </html>
