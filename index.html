@@ -115,7 +115,7 @@ button {
 	border-radius: 10px;
 	cursor: pointer;
 	transition: background-color .3s ease-in;
-	margin: 0 auto;
+	margin: 0 auto 5px;
 	width: 49%;
 }
 button:hover {
@@ -253,6 +253,8 @@ td img {
 	<div class="side-bar">
 		<button type="button" class="js-quickAssign">Quick Assign</button>
 		<button type="button" class="js-stepAssign">Step Assign</button>
+		<button type="button" class="js-singleAssign">Single Assign</button>
+		<button type="button" class="js-clearSweeps">Clear Sweeps</button>
 
 		<div class="js-assignInfo">
 			<p>Assigning Country <span id="stt-currentCountry">0</span>/<span id="stt-countriesTotal">0</span></p>
@@ -282,6 +284,25 @@ const runStepAssign = document.querySelector('.js-stepAssign');
 runStepAssign.addEventListener('click', () => {
 	clearSweepstake();
 	stepAssign();
+});
+
+const runClearSweeps = document.querySelector('.js-clearSweeps');
+runClearSweeps.addEventListener('click', () => {
+	clearSweepstake();
+})
+
+const runSingleAssign = document.querySelector('.js-singleAssign');
+runSingleAssign.addEventListener('click', () => {
+	if (stepPosition > 0) {
+		document.querySelector('.artist-holder').style.opacity = 0;
+		document.querySelector('.js-singingFor').style.opacity = 0;
+		document.querySelector('.assigned-to').style.opacity = 0;
+	}
+
+	setTimeout(function() {
+		singleAssign();
+	}, 1000);
+	
 });
 
 // Just in case someone wants to be able to quick assign / step through without refreshing.
@@ -356,6 +377,145 @@ function rollAllCountries() {
 	}
 
 	updatePlayerBlocks();
+}
+
+function singleAssign() {
+	let timerStart = 1000;
+	let timerFlagGrow = 100;
+	let timerCountryNameIn = 3000;
+	let timerPlayerNameIn = 3000;
+	let timerPanelName = timerStart + timerFlagGrow + timerCountryNameIn + timerPlayerNameIn;
+	let timerNextCountry = 10000;
+
+	let domAssigned = document.createElement('div');
+			domAssigned.classList.add('assigned');
+
+	let domArtistHolder = document.createElement('div');
+		domArtistHolder.classList.add('artist-holder');
+	
+	let domArtistImgHolder = document.createElement('div');
+		domArtistImgHolder.classList.add('artist-img');
+	
+	let domArtistImg = document.createElement('img');
+		domArtistImg.classList.add('js-artistImg');
+	
+	let domArtistCountry = document.createElement('div');
+		domArtistCountry.classList.add('artist-country');
+
+	let domCountryFlag = document.createElement('img');
+		domCountryFlag.classList.add('js-countryImg');
+
+	let domCountryText = document.createElement('span');
+		domCountryText.classList.add('js-countryText');
+		
+	let domArtistName = document.createElement('h2');
+		domArtistName.classList.add('artist-name');
+
+	let domArtistSong = document.createElement('div');
+		domArtistSong.classList.add('artist-song');
+
+	let domSingingFor = document.createElement('h3');
+		domSingingFor.classList.add('js-singingFor');
+		domSingingFor.innerText = 'Singing For';
+
+	let domAssignedTo = document.createElement('div');
+		domAssignedTo.classList.add('assigned-to');
+
+	if (stepPosition == 0) {
+		loadPlayerHolders();
+
+		document.querySelector('.js-assignInfo').style.opacity = 1;
+		document.querySelector('#stt-countriesTotal').innerText = totalCountries;
+		
+		domAssigned.appendChild(domArtistHolder);
+			domArtistHolder.appendChild(domArtistImgHolder);
+				domArtistImgHolder.appendChild(domArtistImg);
+			domArtistHolder.appendChild(domArtistCountry);
+				domArtistCountry.appendChild(domCountryFlag);
+				domArtistCountry.appendChild(domCountryText);
+			domArtistHolder.appendChild(domArtistName);
+			domArtistHolder.appendChild(domArtistSong);
+		domAssigned.appendChild(domSingingFor);
+		domAssigned.appendChild(domAssignedTo);
+
+		document.querySelector('.log-entries').appendChild(domAssigned);
+	} else {
+		
+	}
+
+	if (stepPosition < totalCountries) {
+		currCountryFlag = countries[stepPosition].country.replace(' ', '-').toLowerCase();
+		currCountryName = countries[stepPosition].country;
+
+		document.querySelector('#stt-currentCountry').innerText = stepPosition + 1;
+
+		document.querySelector('.js-artistImg').src = 'assets/'+currCountryFlag+'/'+currCountryFlag+'.jpg';
+		document.querySelector('.js-countryImg').src = `assets/${currCountryFlag}/${currCountryFlag}-flag.png`;
+		document.querySelector('.js-countryText').innerText = currCountryName;
+		document.querySelector('.artist-name').innerText = countries[stepPosition].artist;
+		document.querySelector('.artist-song').innerText = countries[stepPosition].song;
+
+		setTimeout(function() {
+
+			setTimeout(function() {
+				document.querySelector('.artist-holder').style.opacity = 1;
+
+				setTimeout(function() {
+					document.querySelector('.js-singingFor').style.opacity = 1;
+
+					setTimeout(function() {
+						document.querySelector('.assigned-to').style.opacity = 1;
+					}, timerPlayerNameIn);
+				}, timerCountryNameIn);
+			}, timerFlagGrow);
+		}, timerStart);
+
+		if (countriesFull === totalPlayers) {
+			cpu.incrementCountryCount();
+			cpu.assignCountry(countries[stepPosition]);
+
+			if (cpu.countryCount === 1) {
+				players.push(cpu);
+			}
+
+			document.querySelector('.assigned-to').innerText = cpu.name;
+
+			let tbl = document.querySelector('#player-table_'+(totalPlayers));
+			let rows = tbl.rows;
+			rows[cpu.countryCount - 1].cells[0].innerHTML = `<img src="assets/${currCountryFlag}/${currCountryFlag}-flag.png" width="20" height="20">`;
+			rows[cpu.countryCount - 1].cells[1].innerText = currCountryName;
+
+			setTimeout(function() {
+				rows[cpu.countryCount - 1].classList.add('is-visible');
+			}, timerPanelName);
+		} else {
+			playerNumber = randomPlayer();
+
+			document.querySelector('.assigned-to').innerText = players[playerNumber].name;
+
+			let tbl = document.querySelector('#player-table_'+playerNumber);
+			let rows = tbl.rows;
+			rows[players[playerNumber].countryCount].cells[0].innerHTML = `<img src="assets/${currCountryFlag}/${currCountryFlag}-flag.png" width="20" height="20">`;
+			rows[players[playerNumber].countryCount].cells[1].innerText = currCountryName;
+
+			players[playerNumber].incrementCountryCount();
+			players[playerNumber].assignCountry(countries[stepPosition]);
+
+			if (stepPosition < totalCountries && players[playerNumber].countryCount == countriesPerPlayer) countriesFull++;
+
+			setTimeout(function() {
+				rows[players[playerNumber].countryCount -1].classList.add('is-visible');
+			}, timerPanelName);
+		}
+
+		stepPosition++;
+
+//		setTimeout(function() {
+//			document.querySelector('.artist-holder').style.opacity = 0;
+//			document.querySelector('.js-singingFor').style.opacity = 0;
+//			document.querySelector('.assigned-to').style.opacity = 0;
+//		}, (timerNextCountry - timerStart));
+	}
 }
 
 function stepAssign() {
