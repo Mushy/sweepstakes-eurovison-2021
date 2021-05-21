@@ -300,10 +300,13 @@ runSingleAssign.addEventListener('click', () => {
 	}
 
 	setTimeout(function() {
+		// Slight delay to allow the above elements to fade out before switching the values around.
 		singleAssign();
 	}, 1000);
 	
 });
+
+
 
 // Just in case someone wants to be able to quick assign / step through without refreshing.
 function clearSweepstake() {
@@ -322,6 +325,8 @@ function clearSweepstake() {
 	document.querySelector('.assigns').innerHTML = '';
 	document.querySelector('#stt-currentCountry').innerText = '0';
 }
+
+
 
 function rollAllCountries() {
 	let i = 0;
@@ -379,16 +384,11 @@ function rollAllCountries() {
 	updatePlayerBlocks();
 }
 
-function singleAssign() {
-	let timerStart = 1000;
-	let timerFlagGrow = 100;
-	let timerCountryNameIn = 3000;
-	let timerPlayerNameIn = 3000;
-	let timerPanelName = timerStart + timerFlagGrow + timerCountryNameIn + timerPlayerNameIn;
-	let timerNextCountry = 10000;
 
+
+function buildArtist() {
 	let domAssigned = document.createElement('div');
-			domAssigned.classList.add('assigned');
+		domAssigned.classList.add('assigned');
 
 	let domArtistHolder = document.createElement('div');
 		domArtistHolder.classList.add('artist-holder');
@@ -421,102 +421,127 @@ function singleAssign() {
 	let domAssignedTo = document.createElement('div');
 		domAssignedTo.classList.add('assigned-to');
 
-	if (stepPosition == 0) {
-		loadPlayerHolders();
+	domAssigned.appendChild(domArtistHolder);
+		domArtistHolder.appendChild(domArtistImgHolder);
+			domArtistImgHolder.appendChild(domArtistImg);
+		domArtistHolder.appendChild(domArtistCountry);
+			domArtistCountry.appendChild(domCountryFlag);
+			domArtistCountry.appendChild(domCountryText);
+		domArtistHolder.appendChild(domArtistName);
+		domArtistHolder.appendChild(domArtistSong);
+	domAssigned.appendChild(domSingingFor);
+	domAssigned.appendChild(domAssignedTo);
 
-		document.querySelector('.js-assignInfo').style.opacity = 1;
-		document.querySelector('#stt-countriesTotal').innerText = totalCountries;
-		
-		domAssigned.appendChild(domArtistHolder);
-			domArtistHolder.appendChild(domArtistImgHolder);
-				domArtistImgHolder.appendChild(domArtistImg);
-			domArtistHolder.appendChild(domArtistCountry);
-				domArtistCountry.appendChild(domCountryFlag);
-				domArtistCountry.appendChild(domCountryText);
-			domArtistHolder.appendChild(domArtistName);
-			domArtistHolder.appendChild(domArtistSong);
-		domAssigned.appendChild(domSingingFor);
-		domAssigned.appendChild(domAssignedTo);
+	document.querySelector('.log-entries').appendChild(domAssigned);
+}
 
-		document.querySelector('.log-entries').appendChild(domAssigned);
-	} else {
-		
-	}
 
-	if (stepPosition < totalCountries) {
-		currCountryFlag = countries[stepPosition].country.replace(' ', '-').toLowerCase();
-		currCountryName = countries[stepPosition].country;
 
-		document.querySelector('#stt-currentCountry').innerText = stepPosition + 1;
+function startSweep() {
+	loadPlayerHolders();
 
-		document.querySelector('.js-artistImg').src = 'assets/'+currCountryFlag+'/'+currCountryFlag+'.jpg';
-		document.querySelector('.js-countryImg').src = `assets/${currCountryFlag}/${currCountryFlag}-flag.png`;
-		document.querySelector('.js-countryText').innerText = currCountryName;
-		document.querySelector('.artist-name').innerText = countries[stepPosition].artist;
-		document.querySelector('.artist-song').innerText = countries[stepPosition].song;
+	document.querySelector('.js-assignInfo').style.opacity = 1;
+	document.querySelector('#stt-countriesTotal').innerText = totalCountries;
 
+	buildArtist();
+}
+
+
+
+function setNextCountry(timerPlayerNameIn, timerCountryNameIn, timerFlagGrow, timerStart) {
+	currCountryFlag = countries[stepPosition].country.replace(' ', '-').toLowerCase();
+	currCountryName = countries[stepPosition].country;
+
+	document.querySelector('#stt-currentCountry').innerText = stepPosition + 1;
+
+	document.querySelector('.js-artistImg').src = 'assets/'+currCountryFlag+'/'+currCountryFlag+'.jpg';
+	document.querySelector('.js-countryImg').src = `assets/${currCountryFlag}/${currCountryFlag}-flag.png`;
+	document.querySelector('.js-countryText').innerText = currCountryName;
+	document.querySelector('.artist-name').innerText = countries[stepPosition].artist;
+	document.querySelector('.artist-song').innerText = countries[stepPosition].song;
+
+	setTimeout(function() {
 		setTimeout(function() {
+			document.querySelector('.artist-holder').style.opacity = 1;
 
 			setTimeout(function() {
-				document.querySelector('.artist-holder').style.opacity = 1;
+				document.querySelector('.js-singingFor').style.opacity = 1;
 
 				setTimeout(function() {
-					document.querySelector('.js-singingFor').style.opacity = 1;
+					document.querySelector('.assigned-to').style.opacity = 1;
+				}, timerPlayerNameIn);
+			}, timerCountryNameIn);
+		}, timerFlagGrow);
+	}, timerStart);
+}
 
-					setTimeout(function() {
-						document.querySelector('.assigned-to').style.opacity = 1;
-					}, timerPlayerNameIn);
-				}, timerCountryNameIn);
-			}, timerFlagGrow);
-		}, timerStart);
+
+
+function assignArtistTo(playerName, playerNumber, tableRow, timerPanelName) {
+	document.querySelector('.assigned-to').innerText = playerName;
+
+	let tbl = document.querySelector('#player-table_'+(playerNumber));
+	let rows = tbl.rows;
+	rows[tableRow].cells[0].innerHTML = `<img src="assets/${currCountryFlag}/${currCountryFlag}-flag.png" width="20" height="20">`;
+	rows[tableRow].cells[1].innerText = currCountryName;
+
+	setTimeout(function() {
+		rows[tableRow].classList.add('is-visible');
+	}, timerPanelName);
+}
+
+
+
+function assignCPU(timerPanelName) {
+	cpu.incrementCountryCount();
+	cpu.assignCountry(countries[stepPosition]);
+
+	if (cpu.countryCount === 1) players.push(cpu);
+
+	assignArtistTo(cpu.name, totalPlayers, cpu.countryCount - 1, timerPanelName);
+}
+
+
+
+function assignPlayer(timerPanelName) {
+	playerNumber = randomPlayer();
+
+	document.querySelector('.assigned-to').innerText = players[playerNumber].name;
+
+	assignArtistTo(players[playerNumber].name, playerNumber, players[playerNumber].countryCount, timerPanelName);
+
+	players[playerNumber].incrementCountryCount();
+	players[playerNumber].assignCountry(countries[stepPosition]);
+
+	if (stepPosition < totalCountries && players[playerNumber].countryCount == countriesPerPlayer) countriesFull++;
+}
+
+
+
+function singleAssign() {
+	let timerStart = 1000;
+	let timerFlagGrow = 100;
+	let timerCountryNameIn = 3000;
+	let timerPlayerNameIn = 3000;
+	let timerPanelName = timerStart + timerFlagGrow + timerCountryNameIn + timerPlayerNameIn;
+	let timerNextCountry = 10000;
+
+	if (stepPosition == 0) startSweep();
+
+	if (stepPosition < totalCountries) {
+		setNextCountry(timerPlayerNameIn, timerCountryNameIn, timerFlagGrow, timerStart);
 
 		if (countriesFull === totalPlayers) {
-			cpu.incrementCountryCount();
-			cpu.assignCountry(countries[stepPosition]);
-
-			if (cpu.countryCount === 1) {
-				players.push(cpu);
-			}
-
-			document.querySelector('.assigned-to').innerText = cpu.name;
-
-			let tbl = document.querySelector('#player-table_'+(totalPlayers));
-			let rows = tbl.rows;
-			rows[cpu.countryCount - 1].cells[0].innerHTML = `<img src="assets/${currCountryFlag}/${currCountryFlag}-flag.png" width="20" height="20">`;
-			rows[cpu.countryCount - 1].cells[1].innerText = currCountryName;
-
-			setTimeout(function() {
-				rows[cpu.countryCount - 1].classList.add('is-visible');
-			}, timerPanelName);
+			assignCPU(timerPanelName);
 		} else {
-			playerNumber = randomPlayer();
-
-			document.querySelector('.assigned-to').innerText = players[playerNumber].name;
-
-			let tbl = document.querySelector('#player-table_'+playerNumber);
-			let rows = tbl.rows;
-			rows[players[playerNumber].countryCount].cells[0].innerHTML = `<img src="assets/${currCountryFlag}/${currCountryFlag}-flag.png" width="20" height="20">`;
-			rows[players[playerNumber].countryCount].cells[1].innerText = currCountryName;
-
-			players[playerNumber].incrementCountryCount();
-			players[playerNumber].assignCountry(countries[stepPosition]);
-
-			if (stepPosition < totalCountries && players[playerNumber].countryCount == countriesPerPlayer) countriesFull++;
-
-			setTimeout(function() {
-				rows[players[playerNumber].countryCount -1].classList.add('is-visible');
-			}, timerPanelName);
+			assignPlayer(timerPanelName);
 		}
 
 		stepPosition++;
-
-//		setTimeout(function() {
-//			document.querySelector('.artist-holder').style.opacity = 0;
-//			document.querySelector('.js-singingFor').style.opacity = 0;
-//			document.querySelector('.assigned-to').style.opacity = 0;
-//		}, (timerNextCountry - timerStart));
 	}
 }
+
+
 
 function stepAssign() {
 	let timerStart = 1000;
@@ -526,123 +551,15 @@ function stepAssign() {
 	let timerPanelName = timerStart + timerFlagGrow + timerCountryNameIn + timerPlayerNameIn;
 	let timerNextCountry = 10000;
 
-	let domAssigned = document.createElement('div');
-			domAssigned.classList.add('assigned');
-
-	let domArtistHolder = document.createElement('div');
-		domArtistHolder.classList.add('artist-holder');
-	
-	let domArtistImgHolder = document.createElement('div');
-		domArtistImgHolder.classList.add('artist-img');
-	
-	let domArtistImg = document.createElement('img');
-		domArtistImg.classList.add('js-artistImg');
-	
-	let domArtistCountry = document.createElement('div');
-		domArtistCountry.classList.add('artist-country');
-
-	let domCountryFlag = document.createElement('img');
-		domCountryFlag.classList.add('js-countryImg');
-
-	let domCountryText = document.createElement('span');
-		domCountryText.classList.add('js-countryText');
-		
-	let domArtistName = document.createElement('h2');
-		domArtistName.classList.add('artist-name');
-
-	let domArtistSong = document.createElement('div');
-		domArtistSong.classList.add('artist-song');
-
-	let domSingingFor = document.createElement('h3');
-		domSingingFor.classList.add('js-singingFor');
-		domSingingFor.innerText = 'Singing For';
-
-	let domAssignedTo = document.createElement('div');
-		domAssignedTo.classList.add('assigned-to');
-
-	if (stepPosition == 0) {
-		loadPlayerHolders();
-
-		document.querySelector('.js-assignInfo').style.opacity = 1;
-		document.querySelector('#stt-countriesTotal').innerText = totalCountries;
-		
-		domAssigned.appendChild(domArtistHolder);
-			domArtistHolder.appendChild(domArtistImgHolder);
-				domArtistImgHolder.appendChild(domArtistImg);
-			domArtistHolder.appendChild(domArtistCountry);
-				domArtistCountry.appendChild(domCountryFlag);
-				domArtistCountry.appendChild(domCountryText);
-			domArtistHolder.appendChild(domArtistName);
-			domArtistHolder.appendChild(domArtistSong);
-		domAssigned.appendChild(domSingingFor);
-		domAssigned.appendChild(domAssignedTo);
-
-		document.querySelector('.log-entries').appendChild(domAssigned);
-	}
+	if (stepPosition == 0) startSweep();
 
 	if (stepPosition < totalCountries) {
-		currCountryFlag = countries[stepPosition].country.replace(' ', '-').toLowerCase();
-		currCountryName = countries[stepPosition].country;
-
-		document.querySelector('#stt-currentCountry').innerText = stepPosition + 1;
-
-		document.querySelector('.js-artistImg').src = 'assets/'+currCountryFlag+'/'+currCountryFlag+'.jpg';
-		document.querySelector('.js-countryImg').src = `assets/${currCountryFlag}/${currCountryFlag}-flag.png`;
-		document.querySelector('.js-countryText').innerText = currCountryName;
-		document.querySelector('.artist-name').innerText = countries[stepPosition].artist;
-		document.querySelector('.artist-song').innerText = countries[stepPosition].song;
-
-		setTimeout(function() {
-
-			setTimeout(function() {
-				document.querySelector('.artist-holder').style.opacity = 1;
-
-				setTimeout(function() {
-					document.querySelector('.js-singingFor').style.opacity = 1;
-
-					setTimeout(function() {
-						document.querySelector('.assigned-to').style.opacity = 1;
-					}, timerPlayerNameIn);
-				}, timerCountryNameIn);
-			}, timerFlagGrow);
-		}, timerStart);
+		setNextCountry(timerPlayerNameIn, timerCountryNameIn, timerFlagGrow, timerStart);
 
 		if (countriesFull === totalPlayers) {
-			cpu.incrementCountryCount();
-			cpu.assignCountry(countries[stepPosition]);
-
-			if (cpu.countryCount === 1) {
-				players.push(cpu);
-			}
-
-			document.querySelector('.assigned-to').innerText = cpu.name;
-
-			let tbl = document.querySelector('#player-table_'+(totalPlayers));
-			let rows = tbl.rows;
-			rows[cpu.countryCount - 1].cells[0].innerHTML = `<img src="assets/${currCountryFlag}/${currCountryFlag}-flag.png" width="20" height="20">`;
-			rows[cpu.countryCount - 1].cells[1].innerText = currCountryName;
-
-			setTimeout(function() {
-				rows[cpu.countryCount - 1].classList.add('is-visible');
-			}, timerPanelName);
+			assignCPU(timerPanelName);
 		} else {
-			playerNumber = randomPlayer();
-
-			document.querySelector('.assigned-to').innerText = players[playerNumber].name;
-
-			let tbl = document.querySelector('#player-table_'+playerNumber);
-			let rows = tbl.rows;
-			rows[players[playerNumber].countryCount].cells[0].innerHTML = `<img src="assets/${currCountryFlag}/${currCountryFlag}-flag.png" width="20" height="20">`;
-			rows[players[playerNumber].countryCount].cells[1].innerText = currCountryName;
-
-			players[playerNumber].incrementCountryCount();
-			players[playerNumber].assignCountry(countries[stepPosition]);
-
-			if (stepPosition < totalCountries && players[playerNumber].countryCount == countriesPerPlayer) countriesFull++;
-
-			setTimeout(function() {
-				rows[players[playerNumber].countryCount -1].classList.add('is-visible');
-			}, timerPanelName);
+			assignPlayer(timerPanelName);
 		}
 
 		stepPosition++;
@@ -659,6 +576,8 @@ function stepAssign() {
 	}
 }
 
+
+
 // Because apparenly I can't use country as a function name, it complains about constructors.
 function acountry(artist, song, country) {
 	this.artist = artist;
@@ -666,11 +585,15 @@ function acountry(artist, song, country) {
 	this.country = country;
 }
 
+
+
 function addArtist(artist, song, country) {
 	countries.push(new acountry(artist, song, country));
 	shuffleArray(countries);
 	updateTotalStats();
 }
+
+
 
 function player(name) {
 	this.name = name;
@@ -685,6 +608,8 @@ function player(name) {
 		this.countryCount += amount;
 	}
 }
+
+
 
 function addPlayer(name) {
 	var name = name == undefined ? document.getElementById('playerName').value : name;
@@ -710,11 +635,15 @@ function addPlayer(name) {
 	updateTotalStats();
 }
 
+
+
 function randomPlayer() {
 	let player = Math.floor(Math.random() * totalPlayers);
 
 	return players[player].countryCount == countriesPerPlayer ? randomPlayer() : player;
 }
+
+
 
 function shuffleArray(array) {
 	for (let i = array.length - 1; i > 0; i--) {
@@ -722,6 +651,8 @@ function shuffleArray(array) {
 		[array[i], array[j]] = [array[j], array[i]];
 	}
 }
+
+
 
 function updatePlayerBlocks() {
 	let playersContainer = document.querySelector('.assigns');
@@ -772,6 +703,8 @@ function updatePlayerBlocks() {
 	}
 }
 
+
+
 function updateTotalStats() {
 	totalCountries = countries.length;
 	totalPlayers = players.length;
@@ -784,6 +717,8 @@ function updateTotalStats() {
 	document.querySelector('#floatingCountries').innerText = floatingCountries;
 	document.querySelector('#stt-countriesTotal').innerText = totalCountries;
 }
+
+
 
 function createPlayerBlock(id, name, override) {
 	playerBlock  = '<div class="profile">';
@@ -804,6 +739,8 @@ function createPlayerBlock(id, name, override) {
 	document.querySelector('.assigns').insertAdjacentHTML('beforeend', playerBlock);
 }
 
+
+
 function loadPlayerHolders() {
 	for (i = 0; i < totalPlayers; i++) {
 		createPlayerBlock(i, players[i].name);
@@ -813,6 +750,8 @@ function loadPlayerHolders() {
 		createPlayerBlock(i, cpu.name, floatingCountries);
 	}
 }
+
+
 
 let countries = [];
 let players = [];
@@ -840,7 +779,7 @@ addPlayer('Gill');
 addPlayer('Carl');
 addPlayer('Rob');
 
-// Load the teams. This could be shifted to JSON later on to allow for extra events with ease.
+// Load the teams. This could be shifted to JSON later on to allow for extra events with ease or to extend the properties for an artist - YouTube video, audio clip, etc.
 addArtist("Anxhela Peristeri", "Karma", "Albania");
 addArtist("Montaigne", "Technicolour", "Australia");
 addArtist("Vincent Bueno", "Amen", "Austria");
