@@ -548,16 +548,12 @@ function buildArtist() {
 		imgSlideCtrl.addEventListener('click', () => {
 			vidSlide.classList.remove('slideInVid');
 			imgSlide.classList.remove('slideOutImg');
-			//imgSlide.classList.add('slideOutImg');
-			//vidSlide.classList.add('slideInVid');
 		});
 
 	let vidSlideCtrl = document.querySelector('.ctrl-video-slide');
 		vidSlideCtrl.addEventListener('click', () => {
 			imgSlide.classList.add('slideOutImg');
 			vidSlide.classList.add('slideInVid');
-			//vidSlide.classList.remove('slideInVid');
-			//imgSlide.classList.remove('slideOutImg');
 		});
 }
 
@@ -654,6 +650,9 @@ function singleAssign() {
 	let timerNextCountry = 10000;
 
 	if (stepPosition == 0) startSweep();
+
+	document.querySelector('.slide-image').classList.remove('slideOutImg');
+	document.querySelector('.slide-video').classList.remove('slideInVid');
 
 	if (stepPosition < totalCountries) {
 		setNextCountry(timerPlayerNameIn, timerCountryNameIn, timerFlagGrow, timerStart);
