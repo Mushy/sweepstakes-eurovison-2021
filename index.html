@@ -310,6 +310,8 @@ runSingleAssign.addEventListener('click', () => {
 
 // Just in case someone wants to be able to quick assign / step through without refreshing.
 function clearSweepstake() {
+	shuffleArray(countries);
+
 	countriesFull = 0;
 	stepPosition = 0;
 
